@@ -131,3 +131,9 @@ UI is too big/small
 Run:
 
 /iw scale 0.9 (or any value 0.6–2.0)
+<img width="277" height="301" alt="image" src="https://github.com/user-attachments/assets/0899bcb2-7148-49a4-b40f-255d21091628" />
+<img width="283" height="303" alt="image" src="https://github.com/user-attachments/assets/fff5f496-ed3c-4c6c-a5e7-8f054d0dab37" />
+<img width="279" height="304" alt="image" src="https://github.com/user-attachments/assets/179e0c86-84c2-4e04-b6d1-495c983b648d" />
+<img width="371" height="545" alt="image" src="https://github.com/user-attachments/assets/56b1286f-b33d-4bed-a6ca-5ea3df4246c5" />
+
+
