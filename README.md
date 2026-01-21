@@ -1,4 +1,10 @@
-# IllWill
+
+<img width="277" height="301" alt="Screenshot 2026-01-21 124923" src="https://github.com/user-attachments/assets/64b08ef0-fd70-4cbd-9d13-e560366d30fa" />
+
+
+<img width="279" height="304" alt="Screenshot 2026-01-21 125224" src="https://github.com/user-attachments/assets/2ffe9861-7b67-4171-8bb8-b97149e00dfd" />
+
+<img width="371" height="545" alt="Screenshot 2026-01-21 125538" src="https://github.com/user-attachments/assets/f7ce832c-245f-455b-9bff-1e9863ad2aa0" />
 
 **IllWill** is a lightweight **Death Wish tracker** for **Turtle WoW (Vanilla 1.12)** raids. It scans your raid/party for **Warriors** and displays a compact list with each warrior’s **Death Wish status** and a **usage counter**.
 
@@ -131,5 +137,3 @@ UI is too big/small
 Run:
 
 /iw scale 0.9 (or any value 0.6–2.0)
-
-<img width="371" height="545" alt="image" src="https://github.com/user-attachments/assets/1ba8d538-7b2a-44e1-aa0f-1df4515df644" />
