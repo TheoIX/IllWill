@@ -472,7 +472,7 @@ UI_Build = function()
 
   local hdr = f:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
   hdr:SetPoint("TOPLEFT", f, "TOPLEFT", 16, -90)
-  hdr:SetText("  Count                   Name                                                  Status")
+  hdr:SetText("  Count            Name                              Status")
 
   -- Debug checkbox
   local dbg = CreateFrame("CheckButton", nil, f, "UICheckButtonTemplate")
