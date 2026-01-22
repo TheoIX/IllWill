@@ -17,6 +17,9 @@
 IllWill = IllWill or {}
 local IW = IllWill
 
+-- forward declarations for functions used before definition
+local UI_Build
+
 local ADDON_NAME = "IllWill"
 local VERSION    = "1.0"
 
@@ -102,6 +105,8 @@ local function EnsureDB()
   if IllWillDB.showOffline == nil then IllWillDB.showOffline = true end
   if IllWillDB.debug == nil then IllWillDB.debug = false end
   if IllWillDB.dwNameSubstr == nil then IllWillDB.dwNameSubstr = DEFAULT_DW_NAME_SUBSTR end
+
+  if IllWillDB.minimalUI == nil then IllWillDB.minimalUI = false end
   if type(IllWillDB.pos) ~= "table" then
     IllWillDB.pos = { point="CENTER", relPoint="CENTER", x=0, y=0 }
   end
@@ -308,6 +313,99 @@ local function ApplyLockState()
   end
 end
 
+-- ------------------------------------------------------------
+-- Minimal UI mode (rows only, no background)
+-- ------------------------------------------------------------
+
+local MAIN_BACKDROP = {
+  bgFile   = "Interface\\DialogFrame\\UI-DialogBox-Background",
+  edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+  tile = true, tileSize = 32, edgeSize = 32,
+  insets = { left = 8, right = 8, top = 8, bottom = 8 }
+}
+
+local BOX_BACKDROP = {
+  bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
+  edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+  tile = true, tileSize = 16, edgeSize = 12,
+  insets = { left = 3, right = 3, top = 3, bottom = 3 }
+}
+
+local function UI_ApplyMode()
+  if not IW_UI then return end
+  EnsureDB()
+
+  local f = IW_UI
+  local minimal = IllWillDB.minimalUI and true or false
+
+  local function SetDecorShown(shown)
+    if not f._decor then return end
+    local _, obj
+    for _, obj in pairs(f._decor) do
+      if obj and obj.Show and obj.Hide then
+        if shown then obj:Show() else obj:Hide() end
+      end
+    end
+  end
+
+  local sb = _G["IllWillScrollFrameScrollBar"]
+
+  if minimal then
+    SetDecorShown(false)
+
+    -- In Vanilla 1.12, SetBackdrop(nil) can error; keep a backdrop but make it fully transparent.
+    if f.SetBackdrop then f:SetBackdrop(MAIN_BACKDROP) end
+    if f.SetBackdropColor then f:SetBackdropColor(1, 1, 1, 1) end
+    if f.SetBackdropBorderColor then f:SetBackdropBorderColor(1, 1, 1, 1) end
+    if f.SetBackdropColor then f:SetBackdropColor(0, 0, 0, 0) end
+    if f.SetBackdropBorderColor then f:SetBackdropBorderColor(0, 0, 0, 0) end
+
+    if f._box then
+      local box = f._box
+      box:ClearAllPoints()
+      box:SetPoint("TOPLEFT", f, "TOPLEFT", 2, -2)
+      box:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -2, 2)
+
+      if box.SetBackdrop then box:SetBackdrop(BOX_BACKDROP) end
+      if box.SetBackdropColor then box:SetBackdropColor(0, 0, 0, 0) end
+      if box.SetBackdropBorderColor then box:SetBackdropBorderColor(0, 0, 0, 0) end
+    end
+
+    if sb then sb:Hide() end
+  else
+    SetDecorShown(true)
+
+    if f.SetBackdrop then f:SetBackdrop(MAIN_BACKDROP) end
+    if f.SetBackdropColor then f:SetBackdropColor(1, 1, 1, 1) end
+    if f.SetBackdropBorderColor then f:SetBackdropBorderColor(1, 1, 1, 1) end
+
+    if f._box then
+      local box = f._box
+      box:ClearAllPoints()
+      box:SetPoint("TOPLEFT", f, "TOPLEFT", 14, -110)
+      box:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -14, 14)
+
+      if box.SetBackdrop then
+        box:SetBackdrop(BOX_BACKDROP)
+        box:SetBackdropColor(0, 0, 0, 0.35)
+        box:SetBackdropBorderColor(0.25, 0.25, 0.25, 0.9)
+      end
+    end
+
+    if sb then sb:Show() end
+  end
+
+  ApplyLockState()
+end
+
+function IW:SetMinimalUI(on)
+  UI_Build()
+  EnsureDB()
+  IllWillDB.minimalUI = on and true or false
+  UI_ApplyMode()
+  IW:UpdateDisplay()
+end
+
 local function EnsureRow(i, parent, y)
   if IW.rows[i] then return IW.rows[i] end
 
@@ -341,7 +439,7 @@ local function EnsureRow(i, parent, y)
   return row
 end
 
-local function UI_Build()
+UI_Build = function()
   if IW_UI then return end
   EnsureDB()
 
@@ -414,6 +512,7 @@ local function UI_Build()
 
   -- List box
   local box = CreateFrame("Frame", nil, f)
+  f._box = box
   box:SetPoint("TOPLEFT", f, "TOPLEFT", 14, -110)
   box:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -14, 14)
 
@@ -439,6 +538,22 @@ local function UI_Build()
 
   f._scroll = scroll
   f._child  = child
+
+
+-- Store "decor" widgets so hideui/showui can toggle them
+f._decor = {
+  close   = close,
+  title   = title,
+  sub     = sub,
+  hdr     = hdr,
+  dbg     = dbg,
+  resetBtn= resetBtn,
+  lockBtn = lockBtn,
+}
+
+-- Apply saved UI mode (full vs minimal)
+UI_ApplyMode()
+
 
   -- Movement
   f:SetMovable(true)
@@ -596,6 +711,16 @@ function IW:UpdateDisplay()
   if height < 1 then height = 1 end
   child:SetHeight(height)
 
+
+-- In minimal UI mode, shrink/grow the frame to fit the rows (within reason)
+if IllWillDB and IllWillDB.minimalUI and IW_UI then
+  local want = height + 6
+  if want < 28 then want = 28 end
+  if want > 420 then want = 420 end
+  IW_UI:SetHeight(want)
+end
+
+
   local y = -2
   for i = 1, max do
     local e = list[i]
@@ -723,6 +848,7 @@ local function ShowHelp()
   Print("/iw sort status | name")
   Print("/iw offline on | off")
   Print("/iw scale <0.6-2.0>")
+  Print("/iw hideui | showui")
   Print("/iw probe  (prints YOUR Death Wish aura match info)")
 end
 
@@ -754,6 +880,18 @@ local function HandleSlash(msg)
   elseif cmd == "hide" then
     IW:Hide()
     return
+
+
+elseif cmd == "hideui" then
+  IW:SetMinimalUI(true)
+  Print("UI: minimal (rows only).")
+  return
+
+elseif cmd == "showui" then
+  IW:SetMinimalUI(false)
+  Print("UI: full.")
+  return
+
 
   elseif cmd == "toggle" or cmd == "ui" then
     IW:Toggle()
