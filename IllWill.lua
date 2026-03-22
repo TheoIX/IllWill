@@ -739,7 +739,7 @@ function IW:UpdateDisplay()
 
 -- In minimal UI mode, shrink/grow the frame to fit the rows (within reason)
 if IllWillDB and IllWillDB.minimalUI and IW_UI then
-  local want = height + 6
+  local want = height + 18
   if want < 28 then want = 28 end
   if want > 420 then want = 420 end
   IW_UI:SetHeight(want)
