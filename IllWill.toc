@@ -3,5 +3,6 @@
 ## Notes: Raid Death Wish tracker (Warriors)
 ## Author: THEO
 ## Version: 1.0
+## SavedVariables: IllWillDB
 
 IllWill.lua

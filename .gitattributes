@@ -1,0 +1,18 @@
+# Treat all known text files as text and force LF
+*.lua text eol=lf
+*.xml text eol=lf
+*.toc text eol=lf
+*.md  text eol=lf
+*.txt text eol=lf
+
+# Everything else auto
+* text=auto eol=lf
+
+# Explicitly mark binaries so they’re untouched
+*.tga binary
+*.png binary
+*.jpg binary
+*.dds binary
+*.mp3 binary
+*.ogg binary
+*.zip binary
